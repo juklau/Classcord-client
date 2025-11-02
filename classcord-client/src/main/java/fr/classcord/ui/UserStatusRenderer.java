@@ -20,6 +20,18 @@ public class UserStatusRenderer extends DefaultListCellRenderer {
 
     //méthodes
 
+    private static String normalizeStatus(String statut){
+        if(statut == null) return "online";
+        String version = statut.toLowerCase();
+        //unification des statuts
+        return switch(version){
+            case "away" -> "away";
+            case "dnd" -> "dnd";
+            case "invisible", "offline" -> "invisible";
+            default -> "online";
+        };
+    }
+
     @Override
     // pour personnaliser l'apparence d'un élémnent de la liste
     public java.awt.Component getListCellRendererComponent(JList<?> list, Object value,
@@ -27,7 +39,9 @@ public class UserStatusRenderer extends DefaultListCellRenderer {
 
         JLabel label = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
         String user = (String) value; //caster l'objet "value" en String
-        String status = userStatuses.getOrDefault(user, "online"); //si le statut n'est pas trouvé => "online" par défault
+
+        String raw = userStatuses.getOrDefault(user, "online"); //si le statut n'est pas trouvé => "online" par défault
+        String status = normalizeStatus(raw);
 
         Color color;
         switch (status) {

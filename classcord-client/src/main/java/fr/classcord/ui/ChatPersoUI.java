@@ -57,6 +57,32 @@ public class ChatPersoUI extends JFrame {
 
     //méthodes
 
+
+    private static String normalizeStatus(String s) {
+        if (s == null) return "online";
+        String v = s.toLowerCase();
+        return switch (v) {
+            case "away" -> "away";
+            case "dnd" -> "dnd";
+            case "invisible", "offline" -> "invisible";
+            default -> "online";
+        };
+    }
+    /**
+     * Mise à jour immédiate du statut local (suite à changement via la combo),
+     * avec normalisation + rafraîchissement de la JList.
+     */
+    /*public void updateLocalUserStatus(String pseudo, String state) {
+        String normalized = normalizeStatus(state);
+        userStatuses.put(pseudo, normalized);
+
+        // Force un "refresh" de la ligne correspondante
+        userListModel.removeElement(pseudo);
+        userListModel.addElement(pseudo);
+
+        userList.setCellRenderer(new UserStatusRenderer(userStatuses));
+    }*/
+
     //afin d'afficher l'écriture des utilisatuers en couleur
     public void appendFormattedMessage(String from, String content, boolean isPrivate){
         try {
@@ -96,26 +122,25 @@ public class ChatPersoUI extends JFrame {
     }
 
     //pour mettre à jour dynamiquement les personnes connectés en modifiant l'interface graphique
-    public void updateUserList(Map<String, String> userMap){
+   /* public void updateUserList(Map<String, String> userMap){
         SwingUtilities.invokeLater(() -> {
             userListModel.clear();
             // userStatuses.clear();
             System.out.println("Mise à jour de la liste d'utilisateurs connectés :");
             String localUser = clientInvite.getPseudo();
+
             for (Map.Entry<String, String> entry : userMap.entrySet()) {
                 String pseudo = entry.getKey();
                 String statut = entry.getValue();
                 boolean isLocalUser = localUser != null && localUser.equals(pseudo);
-                if (!statut.equalsIgnoreCase("invisible") || isLocalUser) {
 
-                    // Si c'est le localUser ET qu'on a déjà un statut, on ne remplace pas
-                    if (isLocalUser && userStatuses.containsKey(localUser)) {
-                        // On conserve l'ancien statut local
-                        System.out.println("Conservation du statut local existant : " + userStatuses.get(localUser));
-                    } else {
+                //cache les invisible, sauf le local
+                if ("invisible".equals(statut) && isLocalUser) {
+                    //on ne l'ajoute pas
+
+                } else {
                         // Sinon on met à jour le statut normalement
                         userStatuses.put(pseudo, statut);
-                    }
                     if (!userListModel.contains(pseudo)) {
                         userListModel.addElement(pseudo);
                     }
@@ -126,7 +151,8 @@ public class ChatPersoUI extends JFrame {
                 //     System.out.println("Résultat: " + pseudo + " est en ligne."); //ça fonctionne
                 // }
             }
-            //ajouter le pseudo local s'il n'est pas déjà dans la liste
+
+            //s'assurer que le local est présent, et que son statut est conservé
             if(localUser != null && !userMap.containsKey(localUser)){
 
                 //pour éviter qu'il me remets à chaque evenement en couleur vert en écrasant mon statut existant
@@ -144,6 +170,7 @@ public class ChatPersoUI extends JFrame {
                 }else{
                     System.out.println("Statut local conservé : " + userStatuses.get(localUser));
                 }
+
                 if (!userListModel.contains(localUser)) {
                     userListModel.addElement(localUser);
                 }
@@ -151,9 +178,128 @@ public class ChatPersoUI extends JFrame {
             }
             userList.setCellRenderer(new UserStatusRenderer(userStatuses));
         });
+    }*/
+
+    /*public void updateUserList(Map<String, String> userMap) {
+        SwingUtilities.invokeLater(() -> {
+            System.out.println("Mise à jour de la liste d'utilisateurs connectés :");
+
+            String localUser = clientInvite.getPseudo();
+
+
+            //Retirer les utilisateurs qui n'existent plus dans le snapshot serveur
+            userStatuses.keySet().removeIf(pseudo -> !userMap.containsKey(pseudo));
+
+            // 2) Fusion "prudente" des statuts
+            for (Map.Entry<String, String> entry : userMap.entrySet()) {
+                String pseudo  = entry.getKey();
+                String statut  = entry.getValue() == null ? "online" : entry.getValue();
+                boolean isLocalUser = localUser != null && localUser.equals(pseudo);
+
+                String current = userStatuses.get(pseudo);
+
+                if (isLocalUser && current != null) {
+                    // On NE TOUCHE PAS le statut local si déjà choisi par l'utilisateur
+                    System.out.println("Conservation du statut local existant : " + current);
+                } else {
+                    // Règle de priorité : si on a déjà un statut "fort" (Absent/Indisponible),
+                    // on ne l'écrase pas par un simple "online" venant du serveur.
+                    boolean currentIsStrong = current != null && (
+                            current.equalsIgnoreCase("absent") || current.equalsIgnoreCase("indisponible")
+                    );
+                    boolean newIsWeakOnline = statut.equalsIgnoreCase("online");
+
+                    if (currentIsStrong && newIsWeakOnline) {
+                        // On garde le statut fort existant
+                        System.out.println("Préservation du statut fort pour " + pseudo + " : " + current);
+                    } else {
+                        // Sinon on met à jour normalement
+                        userStatuses.put(pseudo, statut);
+                        System.out.println("✔ " + pseudo + " : " + statut);
+                    }
+                }
+            }
+
+            // 3) Reconstruire la liste visible (pas d'invisible sauf local)
+            userListModel.clear();
+            for (Map.Entry<String, String> entry : userStatuses.entrySet()) {
+                String pseudo = entry.getKey();
+                String statut = entry.getValue();
+                boolean isLocalUser = localUser != null && localUser.equals(pseudo);
+
+                if (!"invisible".equalsIgnoreCase(statut) || isLocalUser) {
+                    if (!userListModel.contains(pseudo)) {
+                        userListModel.addElement(pseudo);
+                    }
+                }
+            }
+
+
+            userList.repaint();
+        });
+    }*/
+
+    public void updateUserList(Map<String, String> userMap) {
+        SwingUtilities.invokeLater(() -> {
+            System.out.println("Mise à jour de la liste d'utilisateurs connectés :");
+
+            String localUser = clientInvite.getPseudo();
+
+            // 1) Retirer les utilisateurs qui n'existent plus dans le snapshot serveur
+            userStatuses.keySet().removeIf(pseudo -> !userMap.containsKey(pseudo));
+
+            // 2) Fusion prudente des statuts
+            for (Map.Entry<String, String> entry : userMap.entrySet()) {
+                String pseudo = entry.getKey();
+                String newStatut = entry.getValue() == null ? "online" : entry.getValue().toLowerCase();
+                String currentStatut = userStatuses.get(pseudo);
+
+                boolean isLocalUser = localUser != null && localUser.equals(pseudo);
+                boolean currentIsStrong = currentStatut != null && (
+                        currentStatut.equalsIgnoreCase("dnd") ||
+                                currentStatut.equalsIgnoreCase("indisponible") ||
+                                currentStatut.equalsIgnoreCase("absent") ||
+                                currentStatut.equalsIgnoreCase("invisible")
+                );
+                boolean newIsWeakOnline = newStatut.equals("online");
+
+                if (currentStatut != null && currentIsStrong && newIsWeakOnline) {
+                    // Préserver le statut fort existant pour tous les utilisateurs
+                    System.out.println("Préservation du statut fort pour " + pseudo + " : " + currentStatut);
+                    // Rien à faire, on garde currentStatut
+                } else if (isLocalUser && currentStatut != null) {
+                    // Ne pas toucher au statut local
+                    System.out.println("Conservation du statut local existant : " + currentStatut);
+                    // Rien à faire, on garde currentStatut
+                } else {
+                    // Mise à jour normale
+                    userStatuses.put(pseudo, newStatut);
+                    System.out.println("✔ " + pseudo + " : " + newStatut);
+                }
+            }
+
+            // 3) Reconstruire la liste visible (pas d'invisible sauf local)
+            userListModel.clear();
+            for (Map.Entry<String, String> entry : userStatuses.entrySet()) {
+                String pseudo = entry.getKey();
+                String statut = entry.getValue();
+                boolean isLocalUser = localUser != null && localUser.equals(pseudo);
+
+                if (!"invisible".equalsIgnoreCase(statut) || isLocalUser) {
+                    if (!userListModel.contains(pseudo)) {
+                        userListModel.addElement(pseudo);
+                    }
+                }
+            }
+
+            userList.repaint();
+        });
     }
 
+
+
     public void updateLocalUserStatus(String pseudo, String state){
+
         //mettre à jour le map "userStatuses" => stocke les statuts de tous les utilisateurs
         userStatuses.put(pseudo, state);
 
@@ -176,8 +322,8 @@ public class ChatPersoUI extends JFrame {
         clientInvite.setChatPersoUI(this); //Associer ClientInvite à ChatPersoUI
 
         // Lancer l'écoute des messages (une seule fois !)
-        clientInvite.listenForMessages();
-        controller.demanderListeUtilisateurs();
+        clientInvite.listenForMessages(); //???
+        controller.demanderListeUtilisateurs(); //????
 
         System.out.println("Pseudo dans ChatPersoUI : " + clientInvite.getPseudo());
 
@@ -207,6 +353,7 @@ public class ChatPersoUI extends JFrame {
 
         inputField = new JTextField();
         inputField.addActionListener(new ChatPersoUI.SendMessageListener()); //en appuyant sur Entrée =>message est envoyé
+        inputPanel.add(inputField, BorderLayout.CENTER); //champ de saisie au centre
 
         // Bouton envoyer
         sendButton = new JButton("Envoyer");
@@ -216,14 +363,12 @@ public class ChatPersoUI extends JFrame {
             controller.sendMessage(messageText, selectedUser);
             inputField.setText(""); // vider le champ
         });
-
-        inputPanel.add(inputField, BorderLayout.CENTER); //champ de saisie au centre
         inputPanel.add(sendButton, BorderLayout.EAST); //mettre le bouton à droite
 
         // Ajout des composants
         contentPane.add(inputPanel, BorderLayout.SOUTH); //mettre le champ et le bouton en bas
 
-        //pour afficher les pax connectés
+        //pour afficher les pax connectés ???????????????
         JScrollPane userScroll = new JScrollPane(userList);
         userScroll.setPreferredSize(new Dimension(150, 0));
         add(userScroll, BorderLayout.EAST); // pour mettre à droite
@@ -266,6 +411,9 @@ public class ChatPersoUI extends JFrame {
         //     testMap.put("Bob", "online");
         //     updateUserList(testMap);
         // });
+
+        //Renderer initial
+        userList.setCellRenderer(new UserStatusRenderer(userStatuses));
     }
 
 

@@ -36,9 +36,44 @@ public class ChatController {
 
     // Action Utilisateur
 
+    private static String normalizeStatus(String s) {
+        if (s == null) return "online";
+        String v = s.toLowerCase();
+        return switch (v) {
+            case "away" -> "away";
+            case "dnd" -> "dnd";
+            case "invisible", "offline" -> "invisible"; // offline assimilé à invisible
+            default -> "online";
+        };
+    }
+
+    public void handleUserListUpdate(Map<String, String> updateMap){
+        if (chatPersoUI !=  null){
+            //chatInterfacePerso.updateUserList(new HashMap<>(userStatusMap));
+            chatPersoUI.updateUserList(updateMap);
+        }else if (chatUI != null){
+            //chatInterface.updateUserList(new HashMap<>(userStatusMap));
+            chatUI.updateUserList(updateMap);
+        }
+    }
+
+    /*private void refreshUserListView() {
+        if (chatPersoUI != null) {
+            chatPersoUI.updateUserList(new HashMap<>(userStatusMap));
+        } else if (chatUI != null) {
+            chatUI.updateUserList(new HashMap<>(userStatusMap));
+        }
+    }*/
+
+
+    /* ==================== Actions utilisateur ==================== */
+
+
     public void sendMessage(String messageText, String selectedUser) {
         if(clientInvite == null || messageText == null || messageText.trim().isEmpty()){
-            chatPersoUI.appendFormattedMessage("Système", "Erreur : Vous devez être connecté avant d'envoyer un message.\n", false);
+            if(chatPersoUI != null){
+                chatPersoUI.appendFormattedMessage("Système", "Erreur : Vous devez être connecté avant d'envoyer un message.\n", false);
+            }
             return;
         }
 
@@ -53,14 +88,18 @@ public class ChatController {
 
             //Envoie message privé avec préfixe
             // chatArea.append("**[MP à " + selectedUser + "]** " + messageText + "\n"); //avant la colorisation des messages
-            chatPersoUI.appendFormattedMessage(clientInvite.getPseudo(), "**[MP à " + selectedUser + "]** " + messageText + "\n", true);
+            if(chatPersoUI != null){
+                chatPersoUI.appendFormattedMessage(clientInvite.getPseudo(), "**[MP à " + selectedUser + "]** " + messageText + "\n", true);
+            }
         }else{
             //envoyer un message "global"
             json.put("subtype", "global");
             json.put("to", "global");
 
             // chatArea.append("Vous: " + messageText + "\n"); //afficher le message //avant la colorisation des messages
-            chatPersoUI.appendFormattedMessage(clientInvite.getPseudo(), messageText, false);
+            if(chatPersoUI != null){
+                chatPersoUI.appendFormattedMessage(clientInvite.getPseudo(), messageText, false);
+            }
         }
         clientInvite.send(json.toString());
     }
@@ -75,8 +114,8 @@ public class ChatController {
         //correspondance entre libellé UI et codes de statut =>transformation
         String state = switch (selection) {
             case "Absent" -> "away";  // ou "non joignable" => "not reachable"
-            case "Indisponible" -> "do not disturb";    // => "dnd" ou unavailable
-            case "Invisible" -> "offline";
+            case "Indisponible" -> "dnd";    // => "do not disturb" ou unavailable
+            case "Invisible" -> "invisible";
             case "En ligne", "Disponible" -> "online"; // pour plus de flexibilité
             default -> "online";                 // sécurité par défaut
         };
@@ -88,54 +127,98 @@ public class ChatController {
 
         clientInvite.send(json.toString());
 
-        // Mise à jour immédiate locale (avant que le serveur ne le renvoie)
-        chatPersoUI.updateLocalUserStatus(clientInvite.getPseudo(), state);
+        //Mise à jour immédiate locale (avant que le serveur ne le renvoie)
+        if(chatPersoUI != null){
+            chatPersoUI.updateLocalUserStatus(clientInvite.getPseudo(), state);
+        }
+        userStatusMap.put(clientInvite.getPseudo(), normalizeStatus(state));
+        handleUserListUpdate(new HashMap<>(userStatusMap));
+        //refreshUserListView();
     }
 
 
+
+    /* ==================== Messages reçus du serveur ==================== */
+
     // Traitement des messages reçus
-
-
     public void handleIncomingMessage(JSONObject json){
         String type = json.optString("type");
 
         switch (type) {
             case "message" -> SwingUtilities.invokeLater(this::afficherDernierMessage);
-            case "status" -> { // kijavitva
+            case "status" -> {
                 String username = json.optString("user");
-                String statut = json.optString("state");
-                userStatusMap.put(username, statut);
-                handleUserListUpdate(new HashMap<>(userStatusMap));
+                String statut = normalizeStatus(json.optString("state"));
+                if(username != null && !username.isEmpty()){
+                    userStatusMap.put(username, statut);
+                    handleUserListUpdate(new HashMap<>(userStatusMap));
+                    //refreshUserListView();
+                }
+
             }
-            case "users" -> { //kijavitva
+            case "users" -> {
                 System.out.println("Liste complète reçu");
                 JSONArray usersArray = json.optJSONArray("users");
-                if(usersArray != null){
-                    // Vider temporairement la map des utilisateurs (optionnel, selon ton besoin)
-                    userStatusMap.clear();
-                    for(int i = 0; i < usersArray.length(); i++){ //parcourt toutes les clés (pseudos) dans l'objet users
-                        String pseudo = usersArray.optString(i);
-                        // Ajouter chaque utilisateur avec statut "online" (puisque ce sont ceux connectés)
-                        userStatusMap.put(pseudo, "online");
-                    }
-                    handleUserListUpdate(new HashMap<>(userStatusMap));
-                }else{
-                    System.err.println("Réponse 'users' invalide: pas de champ de 'users'");
+
+                if(usersArray == null) {
+                    System.err.println("Réponse 'users' invalide: pas de champ 'users'");
+                    return;
                 }
+
+                Map<String, String> snapshot = new HashMap<>();
+
+                for(int i = 0; i < usersArray.length(); i++){
+                    Object elem = usersArray.get(i);
+
+                    if(elem instanceof JSONObject object){
+                        String pseudo = object.optString("user", object.optString("name", null));
+
+                        String state;
+                        if(object.has("state")){
+                            //si le serveur envoie un statut => l'utiliser
+                            state = normalizeStatus(object.optString("state"));
+                        }else{
+                            //conserver le statut existant dans notre map
+                            state = userStatusMap.getOrDefault(pseudo, "online");
+                        }
+
+                        if (pseudo != null && !pseudo.isEmpty()) {
+                            snapshot.put(pseudo, state);
+                        }
+                    }else{
+                        //format simple => "Bob"
+                        String pseudo = usersArray.optString(i, null);
+                        if (pseudo != null && !pseudo.isEmpty()){
+                            String previousState = userStatusMap.getOrDefault(pseudo, "online");
+                            snapshot.put(pseudo, normalizeStatus(previousState));
+                        }
+                    }
+                }
+
+                //userStatusMap.clear();
+                //userStatusMap.putAll(snapshot);
+                // màj => fusionner à la place de remplacer complètement
+                for (Map.Entry<String, String> entry : snapshot.entrySet()) {
+                    userStatusMap.put(entry.getKey(), entry.getValue());
+                }
+
+                handleUserListUpdate(new HashMap<>(userStatusMap));
+
+
             }
+            //Gestion des départs explicits
+            /*case "user_left", "disconnect", "logout" -> {
+                String username = json.optString("user", json.optString("name", null));
+                if(username != null && !username.isEmpty()){
+                    userStatusMap.remove(username);
+                    refreshUserListView();
+                }
+            }*/
             default -> System.out.println("Type de message inconnu : " + type);
         }
     }
 
-    public void handleUserListUpdate(Map<String, String> updateMap){
-        if (chatPersoUI !=  null){
-            //chatInterfacePerso.updateUserList(new HashMap<>(userStatusMap));
-            chatPersoUI.updateUserList(updateMap);
-        }else if (chatUI != null){
-            //chatInterface.updateUserList(new HashMap<>(userStatusMap));
-            chatUI.updateUserList(updateMap);
-        }
-    }
+
 
 
     // Afficher le dernier message reçu

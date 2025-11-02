@@ -441,7 +441,7 @@ JOptionPane.showMessageDialog(this, "Bienvenue " + pseudo + " !");
 ```
 - L'utilisateur passe à la fenêtre principale de **chat**.
 
-En cas d'échec de connexion
+En cas d'échec de connexion :
 -J'affichage un message d’erreur retourné par le serveur.
 ```
 JOptionPane.showMessageDialog(this, "Erreur : " + e.getMessage());
@@ -484,7 +484,7 @@ En cas contraire, je l'ai mis en mode "invisible"
     ```
 
 Actuellement je n'ai pas pu vérifier son bon fonctionnement...
-## Cet icon se trouve dans le dossier image sous le nom `spinner-loading`
+Cet icon se trouve dans le dossier image sous le nom `spinner-loading`
 
 
 Résumé de la troisième journée:
@@ -543,7 +543,7 @@ Dans la méthode **listenForMessages()** de la classe `ClientInvite` j'intercept
             }
         }
     ```
-En format JSON
+En format JSON :
 
     ```
     { "type": "status", "user": "bob", "state": "online" }
@@ -696,7 +696,7 @@ Dans la classe `Message`, j'ai ajouté un attribut subtype:
     ```
 **Différencier l'envoie du message "privé" et "global"**
 
-Pour donner la possibilité d'envoyer un MP ou message global j'ai ajouté un bouton "Global" qui permet accomplir cette tâche
+Pour donner la possibilité d'envoyer un MP ou message global j'ai ajouté un bouton "Global" qui permet accomplir cette tâche :
 
     ```
         globalButton.addActionListener(e -> userList.clearSelection());
@@ -830,7 +830,7 @@ j'ai déclaré ces proptiétés et ajoutés dans le constucteur
 
 **J'ai envoyé un message JSON au serveur afin de savoir le status changé**
 
-Dans la méthode **envoyerStatut()** j'envoie ma statut choisi au serveur afin qu'il soit au courant du changement de mon statut
+Dans la méthode **envoyerStatut()** j'envoie ma statut choisi au serveur afin qu'il soit au courant du changement de mon statut :
 
     ````
         JSONObject json = new JSONObject();
@@ -856,7 +856,7 @@ la méthode **createStatusDot(Color color)** crée et affiche le "point" à côt
 - Ajout des bordures, marges, icônes ou couleurs pour améliorer l'expérience utilisateur.
 - Gestion de la redimension du composant et la réactivité de l'application.
 
-## L'image de l'interface de Chat se trouve dans le dossier image sous le nom `Interface Swing final`
+L'image de l'interface de Chat se trouve dans le dossier image sous le nom `Interface Swing final`
 
 **Tests croisés et débogage**
 
@@ -898,7 +898,7 @@ Voici la modification:
 
 
 
-Résumé de la quatrième journée:
+Résumé de la cinquième journée:
 - Application complète, testée, stable et fonctionnelle
 - Interface Swing finale intégrant la gestion des statuts
 - Dossier de documentation (PDF ou README + captures)

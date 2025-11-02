@@ -307,7 +307,7 @@ Cette méthode de la classe ClientInvite peut être appelée par le bouton d'"En
 
 **Interface graphique Swing de base**
 
-## L'image de cette interface se trouve dans le dossier image sous le nom `ChatInterface`
+# L'image de cette interface se trouve dans le dossier image sous le nom `ChatInterface`
 
 Résumé de la deuxième journée:
 - Classe ClientInvite fonctionnelle capable de communiquer avec un serveur.

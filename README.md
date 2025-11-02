@@ -7,7 +7,7 @@
 
 ### Lancement du Chat
 
-1. Lancer l’application via la classe `ConnectToServeur`.
+1. Lancer l’application via la classe `ConnectToServeurUI` (classcord-client/src/'main/java/fr/classcord'/ui/).
 2. Se connecter au serveur (IP/port).
 3. S’authentifier (inscription + connexion automatique, ou connexion directe, ou mode invité).
 4. Accéder à la fenêtre de chat.
@@ -89,12 +89,12 @@ Pendant cette journée, on configure les IDEs afin de pouvoir travailler en bon 
 
 **Compilation du projet** :
 
-   j'ai compilé le projet en utilisant le "mvn compile" pour voir si ça fonctionne... et ça fonctionnait
+j'ai compilé le projet en utilisant le "mvn compile" pour voir si ça fonctionne... et ça fonctionnait
 
 **BONUS**
 **Test du projet** :
 
-   Dans la classe Main j'ai testé le projet avec "System.out.println("Hello ClassCord")"
+Dans la classe Main j'ai testé le projet avec "System.out.println("Hello ClassCord")"
 
 
 **Résumé de la première journée du projet**
@@ -417,10 +417,10 @@ Lors de l’inscription, les informations sont envoyées au serveur sous forme d
 
 ```json
     {
-      "type": "register",
-      "username": "alice",
-      "password": "azerty"
-    }
+  "type": "register",
+  "username": "alice",
+  "password": "azerty"
+}
  ```
 
 Après une inscription réussie, le client effectue automatiquement la connexion :

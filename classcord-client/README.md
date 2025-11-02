@@ -7,7 +7,7 @@
 
 ### Lancement du Chat
 
-1. Lancer l’application via la classe `ConnectToServeur`.
+1. Lancer l’application via la classe `ConnectToServeurUI` (classcord-client/src/'main/java/fr/classcord'/ui/).
 2. Se connecter au serveur (IP/port).
 3. S’authentifier (inscription + connexion automatique, ou connexion directe, ou mode invité).
 4. Accéder à la fenêtre de chat.

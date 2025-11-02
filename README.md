@@ -55,19 +55,20 @@ Pendant cette journée, on configure les IDEs afin de pouvoir travailler en bon 
 
 **Configuration du projet Maven** :
 
+   ```
     J'ai ajouté la dépendance JSON dans le fichier pom.xml:
       <dependency>
           <groupId>org.json</groupId>
           <artifactId>json</artifactId>
           <version>20231013</version>
       </dependency>
-
+   ```
     Puis j'ai rechargé le projet Maven par MAJ+ALT+U
 
 **Organisation des packages dans VSCode** :
 
     J'ai créé la structure suivante:
-    ```
+   ```
       classcord-client/
         ├── src/
         │   ├── main/
@@ -82,18 +83,18 @@ Pendant cette journée, on configure les IDEs afin de pouvoir travailler en bon 
         │   │   │   │   │   ├── app/
         │   │   │   │   │   │   ├── Main.java
         ├── pom.xml
-    ```
+   ```
         Puis j'ai créé les constructors, les getters et les setters dans les classes Message, et User
 
 
 **Compilation du projet** :
 
-    j'ai compilé le projet en utilisant le "mvn compile" pour voir si ça fonctionne... et ça fonctionnait
+   j'ai compilé le projet en utilisant le "mvn compile" pour voir si ça fonctionne... et ça fonctionnait
 
 **BONUS**
 **Test du projet** :
 
-    Dans la classe Main j'ai testé le projet avec "System.out.println("Hello ClassCord")"
+   Dans la classe Main j'ai testé le projet avec "System.out.println("Hello ClassCord")"
 
 
 **Résumé de la première journée du projet**
@@ -370,7 +371,7 @@ dispose(); // Fermer ConnectToServeur
                 JOptionPane.showMessageDialog(this, "Veuillez entrer une adresse IP valide !");
             }
         }
-    ```
+ ```
 
 ## L'image de l'interface de connexion au Serveur se trouve dans le dossier image sous le nom `ConnectToServeur`
 
@@ -414,13 +415,13 @@ J'ai créé la méthode **btnConnexionChatClic()**, qui permet réaliser cette t
 
 Lors de l’inscription, les informations sont envoyées au serveur sous forme de message JSON :
 
-    ```json
+```json
     {
       "type": "register",
       "username": "alice",
       "password": "azerty"
     }
-    ```
+ ```
 
 Après une inscription réussie, le client effectue automatiquement la connexion :
 ```json
@@ -632,7 +633,7 @@ String selectedUser= userList.getSelectedValue();
         }
         clientInvite.send(json.toString());
         inputField.setText("");
-    ```
+```
 
 J'ai adapté le message JSON à envoyer:
 ```
@@ -743,11 +744,11 @@ return userColors.get(user);
             userColors.put(user, color);
             return color;
         }
-    ```
+```
 
 
 la méthode **appendFormattedMessage(String from, String content, boolean isPrivate)**
-    ```
+   ```
     //afin d'afficher l'écriture des utilisatuers en couleur
     public void appendFormattedMessage(String from, String content, boolean isPrivate){
     try {
@@ -770,7 +771,7 @@ la méthode **appendFormattedMessage(String from, String content, boolean isPriv
                 e.printStackTrace();
             }
         }
-    ```
+ ```
 
 Résumé de la quatrième journée:
 - Inclusion dans l'interface Swing une liste déroulante des utilisateurs connectés.

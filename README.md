@@ -373,13 +373,13 @@ dispose(); // Fermer ConnectToServeur
         }
  ```
 
-## L'image de l'interface de connexion au Serveur se trouve dans le dossier image sous le nom `ConnectToServeur`
+L'image de l'interface de connexion au Serveur se trouve dans le dossier image sous le nom `ConnectToServeur`
 
 **Interface qui permet choisir le mode de la connexion**
 Pendant cet étape user peut choisir s'il voudrait se connecter comme "Invité" ou comme "Utilisateur".
 En appuyant sur un des boutons, il est amené sur l'interface correspondant de son choix
 
-## L'image de l'interface de connexion au Serveur se trouve dans le dossier image sous le nom `ChoixModeUI`
+L'image de l'interface de connexion au Serveur se trouve dans le dossier image sous le nom `ChoixModeUI`
 
 
 **Interface de Connexion (Swing) en tant que l'Utilisateur'**
@@ -398,20 +398,20 @@ Il y a 2 possibilités:
 
 2.L'utilisateur déjà enregistré dans la base de donnée du serveur, il se connect en entrant son nom d'utilisateur et son mot de passe via la méthode **authenticateUser()** qui crée également un Thread dans lequel il fait appel de la méthode **login()** de la classe `User` et pendant cette méthode j'utilise aussi **SwingUtilities.invokeLater()**.
 
-## L'image de l'interface de connexion au Serveur se trouve dans le dossier image sous le nom `LoginUI`
+L'image de l'interface de connexion au Serveur se trouve dans le dossier image sous le nom `LoginUI`
 
 
 **Interface de Connexion (Swing) en tant que l'Invité'**
 Il saisit son nom de pseudo, et en appuyant sur le bouton "Connexion au Chat", il peut accéder au Tchat sans compte, en "Mode invité"
 J'ai créé la méthode **btnConnexionChatClic()**, qui permet réaliser cette tâche.
 
-## L'image de l'interface de connexion au Serveur se trouve dans le dossier image sous le nom `GuestUI`
+L'image de l'interface de connexion au Serveur se trouve dans le dossier image sous le nom `GuestUI`
 
 
 
 **Communication avec le Serveur (Socket + JSON)**
 
-## L'image de l'interface de Chat se trouve dans le dossier image sous le nom `ChatIterfacePerso`
+L'image de l'interface de Chat se trouve dans le dossier image sous le nom `ChatIterfacePerso`
 
 Lors de l’inscription, les informations sont envoyées au serveur sous forme de message JSON :
 

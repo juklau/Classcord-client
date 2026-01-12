@@ -122,7 +122,7 @@ public class ChatPersoUI extends JFrame {
     }
 
     //pour mettre à jour dynamiquement les personnes connectés en modifiant l'interface graphique
-   /* public void updateUserList(Map<String, String> userMap){
+   /*public void updateUserList(Map<String, String> userMap){
         SwingUtilities.invokeLater(() -> {
             userListModel.clear();
             // userStatuses.clear();
@@ -234,14 +234,13 @@ public class ChatPersoUI extends JFrame {
                 }
             }
 
-
             userList.repaint();
         });
     }*/
 
     public void updateUserList(Map<String, String> userMap) {
         SwingUtilities.invokeLater(() -> {
-            System.out.println("Mise à jour de la liste d'utilisateurs connectés :");
+            System.out.println("Mise à jour de la liste d'utilisateurs connectés!");
 
             String localUser = clientInvite.getPseudo();
 
@@ -251,7 +250,8 @@ public class ChatPersoUI extends JFrame {
             // 2) Fusion prudente des statuts
             for (Map.Entry<String, String> entry : userMap.entrySet()) {
                 String pseudo = entry.getKey();
-                String newStatut = entry.getValue() == null ? "online" : entry.getValue().toLowerCase();
+                String newStatut = entry.getValue();
+                        //== null ? "online" : entry.getValue().toLowerCase();
                 String currentStatut = userStatuses.get(pseudo);
 
                 boolean isLocalUser = localUser != null && localUser.equals(pseudo);
@@ -269,7 +269,7 @@ public class ChatPersoUI extends JFrame {
                     // Rien à faire, on garde currentStatut
                 } else if (isLocalUser && currentStatut != null) {
                     // Ne pas toucher au statut local
-                    System.out.println("Conservation du statut local existant : " + currentStatut);
+                    System.out.println("Conservation du statut local existant : " + pseudo + " : " + currentStatut);
                     // Rien à faire, on garde currentStatut
                 } else {
                     // Mise à jour normale
@@ -321,9 +321,9 @@ public class ChatPersoUI extends JFrame {
 
         clientInvite.setChatPersoUI(this); //Associer ClientInvite à ChatPersoUI
 
-        // Lancer l'écoute des messages (une seule fois !)
-        clientInvite.listenForMessages(); //???
-        controller.demanderListeUtilisateurs(); //????
+        // Lancer l'écoute des messages (une seule fois !) => c'est fait dans le constructeur de ChatControlleur
+        //clientInvite.listenForMessages(); //???
+        //controller.demanderListeUtilisateurs(); //????
 
         System.out.println("Pseudo dans ChatPersoUI : " + clientInvite.getPseudo());
 

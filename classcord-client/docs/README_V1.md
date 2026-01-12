@@ -5,12 +5,25 @@
 
 # ClassCord Client
 
+## 🎯 Objectif du projet
+
+ClassCord Client est une application de messagerie instantanée en Java,
+développée dans le cadre d’une semaine intensive.
+Elle permet la communication entre plusieurs utilisateurs via un serveur TCP,
+avec gestion des comptes, des statuts et des messages privés.
+
 ### Lancement du Chat
 
-1. Lancer l’application via la classe `ConnectToServeurUI` (classcord-client/src/'main/java/fr/classcord'/ui/).
-2. Se connecter au serveur (IP/port).
-3. S’authentifier (inscription + connexion automatique, ou connexion directe, ou mode invité).
-4. Accéder à la fenêtre de chat.
+1. Clonage du projet en local :
+```bash
+    git clone https://github.com/votre-identifiant/classcord-client.git
+    cd classcord-client
+   ```
+2. Lancement du serveur 'python_serveur_chat.py' (classcord-client/code_serveur/)
+3. Lancer l’application via la classe `ConnectToServeurUI` (classcord-client/src/'main/java/fr/classcord'/ui/).
+4. Se connecter au serveur (IP/port).
+5. S’authentifier (inscription + connexion automatique, ou connexion directe, ou mode invité).
+6. Accéder à la fenêtre de chat.
 
 
 # 📖 Jour 1 - Mise en place du projet et modélisation
@@ -108,7 +121,7 @@ Dans la classe Main j'ai testé le projet avec "System.out.println("Hello ClassC
 # 📖 Jour 2 - Connexion au serveur et tchat en mode invité
 
 Le but de cet étape pendant le dévéloppement du Tchat:
-En entrant le pseudo, adresse IP et port du serveur, l'utilisateur peut connecter au Serveur grâce à une socket TCP comme "invité", et avec le bon gestion des messages, il peut communiquer avec des autres personnes connectés comme "invité".
+En entrant le pseudo, adresse IP et port du serveur, l'utilisateur peut se connecter au Serveur grâce à une socket TCP comme "invité", et avec le bon gestion des messages, il peut communiquer avec des autres personnes connectés comme "invité".
 
 ## Fonctionnalités Dévelopées
 - Permission afin que l'utilisateur puisse de **se connecter à un serveur** via une adresse IP et un port.
@@ -230,7 +243,7 @@ Cette méthode est appelée par le bouton de "Connexion"
 
 **Envoi des messages via la méthode send(String message)**
 
-Cette méthode de la classe ClientInvite peut être appelée par le bouton d'"Envoyer" ou sur appuyant sur "Entrée"
+Cette méthode de la classe ClientInvite peut être appelée par le bouton d' "Envoyer" ou sur appuyant sur "Entrée"
 
     ```
     sendButton.addActionListener(e -> sendMessage());
@@ -337,45 +350,49 @@ Résumé de la deuxième journée:
 
 **Connexion au serveur**
 
-L'utilisateur peut connecter au Serveur en saissant l'adresse IP et le port du serveur.
+L'utilisateur peut se connecter au Serveur en saissant l'adresse IP et le port du serveur.
 Une fois connecté, il accéde à l'interface d'authentification.
 
 Pour cette connexion j'ai créé la méthode suivant dans la classe ConnectToServeur:
 ```
 private void connectToServer(){
-String ip = adresseIPServeur.getText().trim();
-int port;
-try {
-//transtypage de String en int
-port = Integer.parseInt(adressePortServeur.getText().trim());
-} catch (NumberFormatException e) {
-JOptionPane.showMessageDialog(this, "Le port doit être un nombre valide !");
-return;
-}
-if (!ip.isEmpty()) {
-clientInvite = new ClientInvite("invité"); // Utilisation d’un pseudo temporaire
-boolean connected = clientInvite.connect(ip, port);
-if (connected) {
-JOptionPane.showMessageDialog(this, "Connexion réussie au serveur " + ip + " : " + port);
-dispose(); // Fermer ConnectToServeur
+    String ip = adresseIPServeur.getText().trim();
+    int port;
+    
+    try {
+        //transtypage de String en int
+        port = Integer.parseInt(adressePortServeur.getText().trim());
+    } catch (NumberFormatException e) {
+        JOptionPane.showMessageDialog(this, "Le port doit être un nombre valide !");
+        return;
+    }
+    
+    if (!ip.isEmpty()) {
+        clientInvite = new ClientInvite("invité"); // Utilisation d’un pseudo temporaire
+        boolean connected = clientInvite.connect(ip, port);
+        
+        if (connected) {
+            JOptionPane.showMessageDialog(this, "Connexion réussie au serveur " + ip + " : " + port);
+            dispose(); // Fermer ConnectToServeur
 
-                    if (clientInvite != null) {
-                            SwingUtilities.invokeLater(() -> new ChoixModeUI(clientInvite).setVisible(true));
-                        } else {
-                            System.err.println("Erreur : clientInvite est null !");
-                        }
-                } else {
-                    JOptionPane.showMessageDialog(this, "Erreur de connexion au serveur.");
-                }
+            if (clientInvite != null) {
+                SwingUtilities.invokeLater(() -> new ChoixModeUI(clientInvite).setVisible(true));
             } else {
-                JOptionPane.showMessageDialog(this, "Veuillez entrer une adresse IP valide !");
+                System.err.println("Erreur : clientInvite est null !");
             }
+        } else {
+            JOptionPane.showMessageDialog(this, "Erreur de connexion au serveur.");
         }
+    } else {
+        JOptionPane.showMessageDialog(this, "Veuillez entrer une adresse IP valide !");
+    }
+}
  ```
 
 L'image de l'interface de connexion au Serveur se trouve dans le dossier image sous le nom `ConnectToServeur`
 
 **Interface qui permet choisir le mode de la connexion**
+
 Pendant cet étape user peut choisir s'il voudrait se connecter comme "Invité" ou comme "Utilisateur".
 En appuyant sur un des boutons, il est amené sur l'interface correspondant de son choix
 
@@ -392,17 +409,18 @@ L'image de l'interface de connexion au Serveur se trouve dans le dossier image s
 Il y a 2 possibilités:
 1. Le nouveau utilisateur s'enregistre via le bouton "S'inscrire" et puis il accéde automatiquement au Tchat via
    la méthode **loginApresRegistration()** de la classe `LoginUI`.
-   Cette méthode crée un Thread dans lequel elle fait appel de la méthode **register()** et **login()** de la classe `User`.
-   Pendant cette méthode j'utilise **SwingUtilities.invokeLater()** qui permet exécuter du code sur le thread de l’interface graphique.
+   - Cette méthode crée un Thread dans lequel elle fait appel de la méthode **register()** et **login()** de la classe `User`.
+   - Pendant cette méthode j'utilise **SwingUtilities.invokeLater()** qui permet exécuter du code sur le thread de l’interface graphique.
 
 
-2.L'utilisateur déjà enregistré dans la base de donnée du serveur, il se connect en entrant son nom d'utilisateur et son mot de passe via la méthode **authenticateUser()** qui crée également un Thread dans lequel il fait appel de la méthode **login()** de la classe `User` et pendant cette méthode j'utilise aussi **SwingUtilities.invokeLater()**.
+2. L'utilisateur déjà enregistré dans la base de donnée du serveur, il se connect en entrant son nom d'utilisateur et son mot de passe via la méthode **authenticateUser()** qui crée également un Thread dans lequel il fait appel de la méthode **login()** de la classe `User` et pendant cette méthode j'utilise aussi **SwingUtilities.invokeLater()**.
 
 L'image de l'interface de connexion au Serveur se trouve dans le dossier image sous le nom `LoginUI`
 
 
 **Interface de Connexion (Swing) en tant que l'Invité'**
-Il saisit son nom de pseudo, et en appuyant sur le bouton "Connexion au Chat", il peut accéder au Tchat sans compte, en "Mode invité"
+
+Il saisit son nom de pseudo, et en appuyant sur le bouton "Connexion au Chat", il peut accéder au Tchat sans compte, en "Mode invité". 
 J'ai créé la méthode **btnConnexionChatClic()**, qui permet réaliser cette tâche.
 
 L'image de l'interface de connexion au Serveur se trouve dans le dossier image sous le nom `GuestUI`
@@ -442,7 +460,7 @@ JOptionPane.showMessageDialog(this, "Bienvenue " + pseudo + " !");
 - L'utilisateur passe à la fenêtre principale de **chat**.
 
 En cas d'échec de connexion :
--J'affichage un message d’erreur retourné par le serveur.
+- J'affichage un message d’erreur retourné par le serveur.
 ```
 JOptionPane.showMessageDialog(this, "Erreur : " + e.getMessage());
 ```
@@ -470,6 +488,7 @@ J'ai instancié "JpasswordField":
 
 
 **Ajoute d'une icône de chargement pendant la tentative de connexion**
+
 Je l'ai téléchargé sur le site https://pixabay.com/fr/gifs/
 Pendant l'attente de connexion je l'ai mis en "visible":
 
@@ -503,7 +522,7 @@ Résumé de la troisième journée:
 Pendant cette journée afin de comprendre comment les utilisateurs sont identifiés et suivis par le serveur il a fallu développer différentes fonctionnalités du Tchat
 
 
-## Fonctionnalités Dévelopées
+## Fonctionnalités Développées
 - Récupération de la liste des utilisateurs connectés à tout moment (via les messages de statut).
 - Affichage dynamique de cette liste dans l'interface utilisateur (Swing).
 - Possibilité d'envoyer un message privé à un utilisateur précis.
@@ -806,7 +825,7 @@ J'ai travaillé dans la classe `ChatInterfacePerso` pendant cette journée
 
 **Ajout de la gestion des statuts utilisateur**
 
-J'ai ajouteé un menu déroulant (JComboBox) pour choisir le statut par utilisateur:
+J'ai ajouté un menu déroulant (JComboBox) pour choisir le statut par utilisateur:
 
 j'ai déclaré ces proptiétés et ajoutés dans le constucteur
 
@@ -939,7 +958,7 @@ Résumé de la cinquième journée:
         │   │   │   │   │   │   ├── UserColorManager
         │   │   │   │   │   ├── ui/
         │   │   │   │   │   │   ├── ChatPersoUI
-        │   │   │   │   │   │   ├── ChatUI
+        │   │   │   │   │   │   ├── ChatUI (inactif)
         │   │   │   │   │   │   ├── ChoixModeUI
         │   │   │   │   │   │   ├── ConnectToServeurUI
         │   │   │   │   │   │   ├── GuestUI

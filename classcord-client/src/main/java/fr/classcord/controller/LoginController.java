@@ -36,7 +36,7 @@ public class LoginController {
                     // onlineUsers.add(username);
                     // refreshUserList();
 
-                    // préparation de la requête pour récupérer la lise des utilisateus en ligne
+                    // préparation de la requête pour récupérer la liste des utilisateus en ligne
                     JSONObject requestUserList = new JSONObject();
                     requestUserList.put("type", "users");
 

@@ -5,12 +5,14 @@ import org.json.JSONObject;
 public class Message{
 
     //propriétés
-    public String type;
-    public String subtype;
-    public String from;
-    public String to;
-    public String content;
-    public String timestamp;
+
+    // Attributs (stockage des données)
+    public String type;       // Type de message : "message", "status", "login", etc.
+    public String subtype;    // "global" ou "private"
+    public String from;       // Expéditeur
+    public String to;         // Destinataire
+    public String content;    // Contenu du message
+    public String timestamp;  // Horodatage
 
 
     // Constructeurs

@@ -9,8 +9,9 @@ import org.json.JSONObject;
 public class User {
 
     //propriétés
-    private String username;
-    private String status;
+    private String username;  // Nom d'utilisateur
+    private String status;    // Statut actuel
+
 
 
     // Constructeurs

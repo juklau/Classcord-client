@@ -40,7 +40,7 @@ public class UserStatusRenderer extends DefaultListCellRenderer {
         JLabel label = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
         String user = (String) value; //caster l'objet "value" en String
 
-        String raw = userStatuses.getOrDefault(user, "online"); //si le statut n'est pas trouvé => "online" par défault
+        String raw = userStatuses.getOrDefault(user, "unknown"); //si le statut n'est pas trouvé => "online" par défault
         String status = normalizeStatus(raw);
 
         Color color;

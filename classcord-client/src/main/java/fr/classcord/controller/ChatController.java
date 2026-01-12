@@ -36,18 +36,18 @@ public class ChatController {
 
     // Action Utilisateur
 
-    private static String normalizeStatus(String s) {
-        if (s == null) return "online";
+    /*private static String normalizeStatus(String s) {
+        if (s == null) return "unknown";
         String v = s.toLowerCase();
         return switch (v) {
             case "away" -> "away";
             case "dnd" -> "dnd";
             case "invisible", "offline" -> "invisible"; // offline assimilé à invisible
-            default -> "online";
+            default -> "unknown";
         };
-    }
+    }*/
 
-    public void handleUserListUpdate(Map<String, String> updateMap){
+    /*public void handleUserListUpdate(Map<String, String> updateMap){
         if (chatPersoUI !=  null){
             //chatInterfacePerso.updateUserList(new HashMap<>(userStatusMap));
             chatPersoUI.updateUserList(updateMap);
@@ -55,15 +55,16 @@ public class ChatController {
             //chatInterface.updateUserList(new HashMap<>(userStatusMap));
             chatUI.updateUserList(updateMap);
         }
-    }
+    }*/
 
-    /*private void refreshUserListView() {
+    private void refreshUserListView() {
         if (chatPersoUI != null) {
-            chatPersoUI.updateUserList(new HashMap<>(userStatusMap));
+            //chatPersoUI.updateUserList(new HashMap<>(userStatusMap)); =>regi
+            chatPersoUI.updateUserList(userStatusMap);
         } else if (chatUI != null) {
             chatUI.updateUserList(new HashMap<>(userStatusMap));
         }
-    }*/
+    }
 
 
     /* ==================== Actions utilisateur ==================== */
@@ -131,16 +132,17 @@ public class ChatController {
         if(chatPersoUI != null){
             chatPersoUI.updateLocalUserStatus(clientInvite.getPseudo(), state);
         }
-        userStatusMap.put(clientInvite.getPseudo(), normalizeStatus(state));
-        handleUserListUpdate(new HashMap<>(userStatusMap));
-        //refreshUserListView();
+       // userStatusMap.put(clientInvite.getPseudo(), normalizeStatus(state)); =>regi
+        userStatusMap.put(clientInvite.getPseudo(), state);
+        //handleUserListUpdate(new HashMap<>(userStatusMap));
+        refreshUserListView();
     }
 
 
 
     /* ==================== Messages reçus du serveur ==================== */
 
-    // Traitement des messages reçus
+    // Traitement des messages reçus ==>itt van valami problèma!!!!!!!!!!!
     public void handleIncomingMessage(JSONObject json){
         String type = json.optString("type");
 
@@ -148,13 +150,14 @@ public class ChatController {
             case "message" -> SwingUtilities.invokeLater(this::afficherDernierMessage);
             case "status" -> {
                 String username = json.optString("user");
-                String statut = normalizeStatus(json.optString("state"));
+               // String statut = normalizeStatus(json.optString("state")); =>regi
+                String statut = json.optString("state");
                 if(username != null && !username.isEmpty()){
                     userStatusMap.put(username, statut);
-                    handleUserListUpdate(new HashMap<>(userStatusMap));
-                    //refreshUserListView();
+                    //handleUserListUpdate(new HashMap<>(userStatusMap));
+                    refreshUserListView();
                 }
-
+                System.out.println("[STATUS] " + username + " est maintenant " + statut);
             }
             case "users" -> {
                 System.out.println("Liste complète reçu");
@@ -170,16 +173,19 @@ public class ChatController {
                 for(int i = 0; i < usersArray.length(); i++){
                     Object elem = usersArray.get(i);
 
+                    System.out.println("kereses: " + elem);
                     if(elem instanceof JSONObject object){
-                        String pseudo = object.optString("user", object.optString("name", null));
+                        String pseudo = object.optString("user", object.optString("name", "unknown"));
+
 
                         String state;
                         if(object.has("state")){
                             //si le serveur envoie un statut => l'utiliser
-                            state = normalizeStatus(object.optString("state"));
+                            //state = normalizeStatus(object.optString("state")); =>regi
+                            state = object.optString("state");
                         }else{
                             //conserver le statut existant dans notre map
-                            state = userStatusMap.getOrDefault(pseudo, "online");
+                            state = userStatusMap.getOrDefault(pseudo, "unknown");
                         }
 
                         if (pseudo != null && !pseudo.isEmpty()) {
@@ -189,8 +195,9 @@ public class ChatController {
                         //format simple => "Bob"
                         String pseudo = usersArray.optString(i, null);
                         if (pseudo != null && !pseudo.isEmpty()){
-                            String previousState = userStatusMap.getOrDefault(pseudo, "online");
-                            snapshot.put(pseudo, normalizeStatus(previousState));
+                            String previousState = userStatusMap.getOrDefault(pseudo, "masodik");
+                            //snapshot.put(pseudo, normalizeStatus(previousState));  =>regi
+                            snapshot.put(pseudo, previousState);
                         }
                     }
                 }
@@ -202,10 +209,11 @@ public class ChatController {
                     userStatusMap.put(entry.getKey(), entry.getValue());
                 }
 
-                handleUserListUpdate(new HashMap<>(userStatusMap));
-
+                //handleUserListUpdate(new HashMap<>(userStatusMap));
+                refreshUserListView();
 
             }
+
             //Gestion des départs explicits
             /*case "user_left", "disconnect", "logout" -> {
                 String username = json.optString("user", json.optString("name", null));

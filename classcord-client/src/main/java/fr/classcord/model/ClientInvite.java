@@ -21,16 +21,22 @@ import fr.classcord.ui.ChatUI;
 public class ClientInvite {
 
     //propriétés
-    private Socket socket;
-    private PrintWriter writer;
-    private BufferedReader reader;
+
+    // Attributs réseau
+    private Socket socket;              // Connexion TCP au serveur
+    private PrintWriter writer;          // Pour ENVOYER des messages
+    private BufferedReader reader;       // Pour RECEVOIR des messages
+
+    // Attributs utilisateur
     private String pseudo;
     private String lastMessage = "";
+
+    // Références aux interfaces graphiques
     private ChatPersoUI chatPersoUI;
     private ChatUI chatUI;
     private ChatController controller;
     
-    //suivre les utilisateurs et leur état en les stockant
+    //suivre les utilisateurs et leur état en les stockant => Données partagées
     private final Map<String, String> userStatusMap = new HashMap<>(); //ex.: dodo online
 
 
